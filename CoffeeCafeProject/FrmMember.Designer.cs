@@ -68,6 +68,7 @@
             this.lvShowAllMember.Size = new System.Drawing.Size(422, 312);
             this.lvShowAllMember.TabIndex = 46;
             this.lvShowAllMember.UseCompatibleStateImageBehavior = false;
+            this.lvShowAllMember.ItemActivate += new System.EventHandler(this.lvShowAllMember_ItemActivate);
             // 
             // tbMemberName
             // 
@@ -134,6 +135,7 @@
             this.btClose.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btClose.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.btClose.UseVisualStyleBackColor = true;
+            this.btClose.Click += new System.EventHandler(this.btClose_Click);
             // 
             // btDelete
             // 
@@ -146,6 +148,7 @@
             this.btDelete.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btDelete.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.btDelete.UseVisualStyleBackColor = true;
+            this.btDelete.Click += new System.EventHandler(this.btDelete_Click);
             // 
             // btUpdate
             // 
@@ -158,6 +161,7 @@
             this.btUpdate.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btUpdate.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.btUpdate.UseVisualStyleBackColor = true;
+            this.btUpdate.Click += new System.EventHandler(this.btUpdate_Click);
             // 
             // btSave
             // 
@@ -170,6 +174,7 @@
             this.btSave.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.btSave.UseVisualStyleBackColor = true;
+            this.btSave.Click += new System.EventHandler(this.btSave_Click);
             // 
             // btCancel
             // 
@@ -182,6 +187,7 @@
             this.btCancel.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.btCancel.UseVisualStyleBackColor = true;
+            this.btCancel.Click += new System.EventHandler(this.btCancel_Click);
             // 
             // label4
             // 
@@ -227,6 +233,7 @@
             this.Name = "FrmMember";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Member - SAU Coffee Cafe V.1.0";
+            this.Load += new System.EventHandler(this.FrmMember_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox12)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox11)).EndInit();
             this.ResumeLayout(false);

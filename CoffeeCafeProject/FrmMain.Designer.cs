@@ -561,6 +561,7 @@
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Main - SAU Coffee Cafe V.1.0";
+            this.Load += new System.EventHandler(this.FrmMain_Load);
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pbMenu10)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbMenu5)).EndInit();

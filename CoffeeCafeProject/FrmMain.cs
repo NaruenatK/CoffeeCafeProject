@@ -21,5 +21,10 @@ namespace CoffeeCafeProject
             FrmMember frmMember = new FrmMember();
             frmMember.ShowDialog();
         }
+
+        private void FrmMain_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
