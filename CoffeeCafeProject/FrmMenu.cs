@@ -1,20 +1,26 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CoffeeCafeProject
 {
     public partial class FrmMenu : Form
     {
+
         byte[] menuImage;
+
         public FrmMenu()
         {
             InitializeComponent();
-
         }
 
         private Image convertByteArrayToImage(byte[] byteArrayIn)
@@ -32,19 +38,26 @@ namespace CoffeeCafeProject
             }
             catch (ArgumentException ex)
             {
-                // อาจเกิดขึ้นถ้า byte array ไม่ใช่ข้อมูลรูปภาพที่ถูกต้อง
                 Console.WriteLine("Error converting byte array to image: " + ex.Message);
                 return null;
             }
         }
 
-
+        private byte[] convertImageToByteArray(Image image, ImageFormat imageFormat)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                image.Save(ms, imageFormat);
+                return ms.ToArray();
+            }
+        }
 
         private void getAllMenuToListView()
         {
-            string connectionString = @"Server=DESKTOP-9U4FO0V\SQLEXPRESS;Database=coffee_cafe_db;Trusted_Connection=True;";
 
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            string connectionString = @"LAPTOP-NNRSHB5L\SQLEXPRESS;Database=coffee_cafe_db;Trusted_Connection=True";
+
+            using (SqlConnection sqlConnection = new SqlConnection(ShareResource.connectionString))
             {
                 try
                 {
@@ -57,39 +70,40 @@ namespace CoffeeCafeProject
                         DataTable dataTable = new DataTable();
                         dataAdapter.Fill(dataTable);
 
-                        lvShowAllMenu.Items.Clear();
-                        lvShowAllMenu.Columns.Clear();
-                        lvShowAllMenu.FullRowSelect = true;
-                        lvShowAllMenu.View = View.Details;
+                        lvShowAllMenu.Items.Clear(); 
+                        lvShowAllMenu.Columns.Clear(); 
+                        lvShowAllMenu.FullRowSelect = true; 
+                        lvShowAllMenu.View = View.Details; 
 
                         if (lvShowAllMenu.SmallImageList == null)
                         {
                             lvShowAllMenu.SmallImageList = new ImageList();
-                            lvShowAllMenu.SmallImageList.ImageSize = new Size(50, 50);
-                            lvShowAllMenu.SmallImageList.ColorDepth = ColorDepth.Depth32Bit;
+                            lvShowAllMenu.SmallImageList.ImageSize = new Size(40, 40); 
+                            lvShowAllMenu.SmallImageList.ColorDepth = ColorDepth.Depth32Bit; 
                         }
                         lvShowAllMenu.SmallImageList.Images.Clear();
 
                         lvShowAllMenu.Columns.Add("รูปเมนู", 80, HorizontalAlignment.Left);
-                        lvShowAllMenu.Columns.Add("รหัสเมนู", 80, HorizontalAlignment.Left);
-                        lvShowAllMenu.Columns.Add("ชื้อเมนู", 150, HorizontalAlignment.Left);
-                        lvShowAllMenu.Columns.Add("ราคาเมนู", 80, HorizontalAlignment.Left);
+                        lvShowAllMenu.Columns.Add("รหัสเมนู", 60, HorizontalAlignment.Left); 
+                        lvShowAllMenu.Columns.Add("ชื่อเมนู", 150, HorizontalAlignment.Left); 
+                        lvShowAllMenu.Columns.Add("ราคาเมนู", 80, HorizontalAlignment.Left); 
 
                         foreach (DataRow dataRow in dataTable.Rows)
                         {
                             ListViewItem item = new ListViewItem();
+
                             Image menuImage = null;
                             if (dataRow["menuImage"] != DBNull.Value)
                             {
                                 byte[] imgByte = (byte[])dataRow["menuImage"];
-                                menuImage = convertByteArrayToImage(imgByte);
-                            }
-                            string imageKey = null;
+                                menuImage = convertByteArrayToImage(imgByte); 
+
+                            string imagekey = null;
                             if (menuImage != null)
                             {
-                                imageKey = $"pro_{dataRow["menuId"]}";
-                                lvShowAllMenu.SmallImageList.Images.Add(imageKey, menuImage);
-                                item.ImageKey = imageKey;
+                                imagekey = $"menu_{dataRow["menuId"]}"; 
+                                lvShowAllMenu.SmallImageList.Images.Add(imagekey, menuImage);
+                                item.ImageKey = imagekey; 
                             }
                             else
                             {
@@ -100,24 +114,24 @@ namespace CoffeeCafeProject
                             item.SubItems.Add(dataRow["menuName"].ToString());
                             item.SubItems.Add(dataRow["menuPrice"].ToString());
 
-
                             lvShowAllMenu.Items.Add(item);
+
 
                         }
                     }
-                }
 
+                }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("พบข้อผิดพลาด กรูณาลองใหม่หรือติดต่อ IT : " + ex.Message);
+                    MessageBox.Show("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่หรือติดต่อ IT\n" + ex.Message);
                 }
-
             }
         }
 
         private void FrmMenu_Load(object sender, EventArgs e)
         {
             getAllMenuToListView();
+            menuImage = null;
             pbMenuImage.Image = null;
             tbMenuId.Clear();
             tbMenuName.Clear();
@@ -127,19 +141,11 @@ namespace CoffeeCafeProject
             btDelete.Enabled = false;
         }
 
-        private byte[] convertImageToByteArray(Image image, ImageFormat imageFormat)
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                image.Save(ms, imageFormat);
-                return ms.ToArray();
-            }
-        }
         private void btSelectMenuImage_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.InitialDirectory = @"C:\";
-            openFileDialog.Filter = "Image File (*.jpg;*.png)|*.jpg;*.png";
+            openFileDialog.InitialDirectory = @"C:\\";
+            openFileDialog.Filter = "Image Files|*.jpg;*.png;";
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -154,52 +160,52 @@ namespace CoffeeCafeProject
                     menuImage = convertImageToByteArray(pbMenuImage.Image, ImageFormat.Png);
                 }
             }
-        }
 
-        private void showWarningMSG(string msg)
+        }
+        private void showWarningMessage(string message)
         {
-            MessageBox.Show(msg, "คำเตือน", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(message, "คำเตือน", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void btSave_Click(object sender, EventArgs e)
         {
             if (menuImage == null)
             {
-                showWarningMSG("เลือกรูปเมนูด้วย");
+                showWarningMessage("กรุณาเลือกรูปภาพเมนู");
             }
             else if (tbMenuName.Text.Length == 0)
             {
-                showWarningMSG("ป้อนชื่อสินค้าด้วย");
+                showWarningMessage("กรุณากรอกชื่อเมนู");
             }
             else if (tbMenuPrice.Text.Length == 0)
             {
-                showWarningMSG("ป้อนราคาสินค้าด้วย");
+                showWarningMessage("กรุณากรอกราคาเมนู");
             }
             else
             {
-                string connectionString = @"Server=DESKTOP-9U4FO0V\SQLEXPRESS;Database=coffee_cafe_db;Trusted_Connection=True;";
+                //string connectionString = @"LAPTOP-NNRSHB5L\SQLEXPRESS;Database=coffee_cafe_db;Trusted_Connection=True";
 
-                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                using (SqlConnection sqlConnection = new SqlConnection(ShareResource.connectionString))
                 {
                     try
                     {
-                        sqlConnection.Open();
+                        sqlConnection.Open(); 
 
-                        SqlTransaction sqlTransaction = sqlConnection.BeginTransaction();
-
-                        string countSQL = "SELECT COUNT(*) FROM menu_tb";
-                        using (SqlCommand countCommand = new SqlCommand(countSQL, sqlConnection, sqlTransaction))
+                        String countSQL = "SELECT COUNT(*) FROM menu_tb";
+                        using (SqlCommand conutCommand = new SqlCommand(countSQL, sqlConnection))
                         {
-                            int rowcount = (int)countCommand.ExecuteScalar();
-                            if (rowcount >= 10)
+                            int rowCount = (int)conutCommand.ExecuteScalar(); 
+                            if (rowCount == 10)
                             {
-                                showWarningMSG("ไม่สามารถเพิ่มเมนูได้เกิน 10 รายการ หากต้องการเพิ่มให้ลบของเก่าออกก่อน");
+                                showWarningMessage("มีเมนูได้แค่ 10 รายการเท่านั้น กรุณาลบรายการที่ไม่ต้องการออกก่อน");
                                 return;
                             }
                         }
 
-                        string strSQL = "INSERT INTO menu_tb ( menuName, menuPrice, menuImage) " +
-                                        "VALUES (  @menuName, @menuPrice, @menuImage)";
+                        SqlTransaction sqlTransaction = sqlConnection.BeginTransaction();
+
+                        string strSQL = "INSERT INTO menu_tb (menuName, menuPrice, menuImage) " +
+                                        "VALUES (@menuName, @menuPrice, @menuImage)";
 
                         using (SqlCommand sqlCommand = new SqlCommand(strSQL, sqlConnection, sqlTransaction))
                         {
@@ -210,20 +216,20 @@ namespace CoffeeCafeProject
                             sqlCommand.ExecuteNonQuery();
                             sqlTransaction.Commit();
 
-                            MessageBox.Show("บันทึกเรียบร้อย", "ผลการทำงาน", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show(Text = "บันทึกข้อมูลสินค้าเรียบร้อยแล้ว", "ผลการทำงาน", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                             getAllMenuToListView();
-                            menuImage = null;
-                            pbMenuImage.Image = null;
-                            tbMenuId.Clear();
-                            tbMenuName.Clear();
-                            tbMenuPrice.Clear();
+                            menuImage = null; 
+                            pbMenuImage.Image = null; 
+                            tbMenuId.Clear(); 
+                            tbMenuName.Clear();  
+                            tbMenuPrice.Clear(); 
                         }
-
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("พบข้อผิดพลาด กรูณาลองใหม่หรือติดต่อ IT : " + ex.Message);
+                        MessageBox.Show("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่หรือติดต่อ IT\n" + ex.Message);
+                        return;
                     }
                 }
             }
@@ -231,27 +237,15 @@ namespace CoffeeCafeProject
 
         private void tbMenuPrice_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // อนุญาตให้กดปุ่ม backspace ได้
-            if (char.IsControl(e.KeyChar))
+            if (!char.IsDigit(e.KeyChar) && e.KeyChar != '.' && e.KeyChar != '\b')
             {
-                return;
+                e.Handled = true;
             }
 
-            // อนุญาตให้พิมพ์ตัวเลขได้
-            if (char.IsDigit(e.KeyChar))
+            if (e.KeyChar == '.' && (sender as TextBox).Text.Contains('.'))
             {
-                return;
+                e.Handled = true;
             }
-
-            // อนุญาตให้พิมพ์จุดทศนิยมได้ แต่เฉพาะครั้งเดียว
-            TextBox tb = sender as TextBox;
-            if (e.KeyChar == '.' && !tb.Text.Contains("."))
-            {
-                return;
-            }
-
-            // ไม่ใช่ตัวที่อนุญาต: ปิดการพิมพ์
-            e.Handled = true;
         }
 
         private void lvShowAllMenu_ItemActivate(object sender, EventArgs e)
@@ -261,15 +255,13 @@ namespace CoffeeCafeProject
             tbMenuPrice.Text = lvShowAllMenu.SelectedItems[0].SubItems[3].Text;
 
             var item = lvShowAllMenu.SelectedItems[0];
-            if (item.ImageKey != null && lvShowAllMenu.SmallImageList.Images.ContainsKey(item.ImageKey))
+            if (!string.IsNullOrEmpty(item.ImageKey) && lvShowAllMenu.SmallImageList.Images.ContainsKey(item.ImageKey))
             {
                 pbMenuImage.Image = lvShowAllMenu.SmallImageList.Images[item.ImageKey];
-
             }
             else
             {
                 pbMenuImage.Image = null;
-
             }
 
             btSave.Enabled = false;
@@ -279,10 +271,10 @@ namespace CoffeeCafeProject
 
         private void btDelete_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("คุณต้องการลบเมนูนี้ใช่หรือไม่?", "ยืนยันการลบ", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("ต้องการลบเมนูหรือไม่", "ยืนยัน", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                string connectionString = @"Server=DESKTOP-9U4FO0V\SQLEXPRESS;Database=coffee_cafe_db;Trusted_Connection=True;";
-                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                //string connectionString = @"LAPTOP-NNRSHB5L\SQLEXPRESS;Database=coffee_cafe_db;Trusted_Connection=True";
+                using (SqlConnection sqlConnection = new SqlConnection(ShareResource.connectionString))
                 {
                     try
                     {
@@ -292,21 +284,22 @@ namespace CoffeeCafeProject
                         {
                             sqlCommand.Parameters.Add("@menuId", SqlDbType.Int).Value = int.Parse(tbMenuId.Text);
                             sqlCommand.ExecuteNonQuery();
-                            MessageBox.Show("ลบเมนูเรียบร้อย", "ผลการทำงาน", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                            MessageBox.Show("ลบเมนูเรียบร้อยแล้ว", "ผลการทำงาน", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                             getAllMenuToListView();
-                            pbMenuImage.Image = null;
-                            tbMenuId.Clear();
-                            tbMenuName.Clear();
+                            menuImage = null;
+                            pbMenuImage.Image = null; 
+                            tbMenuId.Clear(); 
+                            tbMenuName.Clear(); 
                             tbMenuPrice.Clear();
-                            btSave.Enabled = true;
                             btUpdate.Enabled = false;
                             btDelete.Enabled = false;
                         }
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("พบข้อผิดพลาด กรูณาลองใหม่หรือติดต่อ IT : " + ex.Message);
+                        MessageBox.Show("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่หรือติดต่อ IT\n" + ex.Message);
                     }
                 }
             }
@@ -314,34 +307,37 @@ namespace CoffeeCafeProject
 
         private void btUpdate_Click(object sender, EventArgs e)
         {
-            if (tbMenuName == null)
+            if (tbMenuName.Text.Length == 0)
             {
-                showWarningMSG("ป้อนชื่อสินค้าด้วย");
+                showWarningMessage("กรุณากรอกชื่อเมนู");
             }
             else if (tbMenuPrice.Text.Length == 0)
             {
-                showWarningMSG("ป้อนราคาสินค้าด้วย");
+                showWarningMessage("กรุณากรอกราคาเมนู");
             }
             else
             {
-                string connectionString = @"Server=DESKTOP-9U4FO0V\SQLEXPRESS;Database=coffee_cafe_db;Trusted_Connection=True;";
-                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+         
+                //string connectionString = @"LAPTOP-NNRSHB5L\SQLEXPRESS;Database=coffee_cafe_db;Trusted_Connection=True";
+
+                using (SqlConnection sqlConnection = new SqlConnection(ShareResource.connectionString))
                 {
                     try
                     {
-                        sqlConnection.Open();
+                        sqlConnection.Open(); 
 
                         SqlTransaction sqlTransaction = sqlConnection.BeginTransaction();
 
                         string strSQL = "";
-
-                        if (menuImage != null)
+                        if (menuImage == null)
                         {
-                            strSQL = "UPDATE menu_tb SET menuName = @menuName, menuPrice = @menuPrice, menuImage = @menuImage WHERE menuId = @menuId";
+                            strSQL = "UPDATE menu_tb SET menuName = @menuName, menuPrice = @menuPrice " +
+                                    "WHERE menuId = @menuId";
                         }
                         else
                         {
-                            strSQL = "UPDATE menu_tb SET menuName = @menuName, menuPrice = @menuPrice WHERE menuId = @menuId";
+                            strSQL = "UPDATE menu_tb SET menuName = @menuName, menuPrice = @menuPrice, menuImage = @menuImage " +
+                                    "WHERE menuId = @menuId";
                         }
 
                         using (SqlCommand sqlCommand = new SqlCommand(strSQL, sqlConnection, sqlTransaction))
@@ -349,27 +345,29 @@ namespace CoffeeCafeProject
                             sqlCommand.Parameters.Add("@menuId", SqlDbType.Int).Value = int.Parse(tbMenuId.Text);
                             sqlCommand.Parameters.Add("@menuName", SqlDbType.NVarChar, 100).Value = tbMenuName.Text;
                             sqlCommand.Parameters.Add("@menuPrice", SqlDbType.Float).Value = float.Parse(tbMenuPrice.Text);
+
                             if (menuImage != null)
                             {
                                 sqlCommand.Parameters.Add("@menuImage", SqlDbType.Image).Value = menuImage;
                             }
+                            
                             sqlCommand.ExecuteNonQuery();
                             sqlTransaction.Commit();
-                            MessageBox.Show("อัพเดทเรียบร้อย", "ผลการทำงาน", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                            MessageBox.Show(Text = "แก้ไขเมนูเรียบร้อยแล้ว", "ผลการทำงาน", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                             getAllMenuToListView();
-                            menuImage = null;
-                            pbMenuImage.Image = null;
-                            tbMenuId.Clear();
-                            tbMenuName.Clear();
-                            tbMenuPrice.Clear();
-                            btSave.Enabled = true;
-                            btUpdate.Enabled = false;
-                            btDelete.Enabled = false;
+                            menuImage = null; 
+                            pbMenuImage.Image = null; 
+                            tbMenuId.Clear(); 
+                            tbMenuName.Clear();  
+                            tbMenuPrice.Clear(); 
                         }
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("พบข้อผิดพลาด กรูณาลองใหม่หรือติดต่อ IT : " + ex.Message);
+                        MessageBox.Show("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่หรือติดต่อ IT\n" + ex.Message);
+                        return;
                     }
                 }
             }
@@ -378,16 +376,14 @@ namespace CoffeeCafeProject
         private void btCancel_Click(object sender, EventArgs e)
         {
             getAllMenuToListView();
-            pbMenuImage.Image = null;
-            tbMenuName.Clear();
-            tbMenuId.Clear();
-            tbMenuPrice.Clear();
             menuImage = null;
+            pbMenuImage.Image = null;
+            tbMenuId.Clear();
+            tbMenuName.Clear();
+            tbMenuPrice.Clear();
             btSave.Enabled = true;
             btUpdate.Enabled = false;
             btDelete.Enabled = false;
-            btCancel.Enabled = false;
-
         }
 
         private void btClose_Click(object sender, EventArgs e)
@@ -396,4 +392,3 @@ namespace CoffeeCafeProject
         }
     }
 }
-

@@ -240,6 +240,7 @@
             this.tbMenuId.ReadOnly = true;
             this.tbMenuId.Size = new System.Drawing.Size(181, 20);
             this.tbMenuId.TabIndex = 65;
+            this.tbMenuId.Text = " ";
             // 
             // FrmMenu
             // 

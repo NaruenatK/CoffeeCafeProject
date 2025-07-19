@@ -103,6 +103,7 @@
             this.tbMemberPhone.Name = "tbMemberPhone";
             this.tbMemberPhone.Size = new System.Drawing.Size(150, 20);
             this.tbMemberPhone.TabIndex = 40;
+            this.tbMemberPhone.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMemberPhone_KeyPress);
             // 
             // pictureBox12
             // 
